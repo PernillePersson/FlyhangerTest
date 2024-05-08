@@ -10,12 +10,10 @@ import static com.mygdx.game.Constants.PPM;
 
 public class Player extends GameEntity {
 
-    private int jumpCounter; // e5
 
     public Player(float width, float height, Body body) {
         super(width, height, body);
         this.speed = 10f;
-        this.jumpCounter = 0;   // e5
     }
 
     @Override
@@ -35,22 +33,19 @@ public class Player extends GameEntity {
     // e5
     private void checkUserInput() {
         velX = 0;
+        velY = 0;
+
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
-            velX = 1;
+            velX += 1;
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT))
-            velX = -1;
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && jumpCounter < 2) {
-            float force = body.getMass() * 18;
-            body.setLinearVelocity(body.getLinearVelocity().x, 0);  // double jump
-            body.applyLinearImpulse(new Vector2(0,force), body.getPosition(), true);
-            jumpCounter++;
-        }
+            velX -= 1;
+        if (Gdx.input.isKeyPressed(Input.Keys.UP))
+            velY += 1;
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN))
+            velY -= 1;
 
-        // reset jumpcounter
-        if (body.getLinearVelocity().y == 0) {   // hit floor after jump
-            jumpCounter = 0;
-        }
 
-        body.setLinearVelocity(velX * speed, body.getLinearVelocity().y < 25 ? body.getLinearVelocity().y : 25 );
+        body.setLinearVelocity(velX * speed, velY * speed);
+
     }
 }

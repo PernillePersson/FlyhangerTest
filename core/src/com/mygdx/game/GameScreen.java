@@ -6,6 +6,7 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.maps.tiled.renderers.IsometricTiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -21,7 +22,8 @@ public class GameScreen extends ScreenAdapter {
     private World world;
     private Box2DDebugRenderer box2DDebugRenderer;
 
-    private OrthogonalTiledMapRenderer orthogonalTiledMapRenderer;  // e2
+     // e2
+    private IsometricTiledMapRenderer isometricTiledMapRenderer;
     private TileMapHelper tileMapHelper; // e2
 
     // e4
@@ -39,16 +41,17 @@ public class GameScreen extends ScreenAdapter {
         this.box2DDebugRenderer = new Box2DDebugRenderer();
 
         this.tileMapHelper = new TileMapHelper(this);  // e2, e3: parameter
-        this.orthogonalTiledMapRenderer = tileMapHelper.setupMap(); // e2
+        this.isometricTiledMapRenderer = tileMapHelper.setupMap(); // e2
 
     }
 
     private void update() {
         world.step(1/60f,6,2);
+
         cameraUpdate();
 
         batch.setProjectionMatrix(camera.combined);
-        orthogonalTiledMapRenderer.setView(camera); // e2
+        isometricTiledMapRenderer.setView(camera); // e2
         player.update(); // e5
 
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
@@ -75,7 +78,7 @@ public class GameScreen extends ScreenAdapter {
         Gdx.gl.glClearColor(0,0,0.3f,1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        orthogonalTiledMapRenderer.render(); // e2
+        isometricTiledMapRenderer.render(); // e2
 
         batch.begin();
 

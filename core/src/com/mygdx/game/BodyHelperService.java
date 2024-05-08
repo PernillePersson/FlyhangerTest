@@ -10,7 +10,7 @@ public class BodyHelperService {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = isStatic ? BodyDef.BodyType.StaticBody : BodyDef.BodyType.DynamicBody;
         bodyDef.position.set(x / PPM, y / PPM);
-        bodyDef.fixedRotation = true;
+        //bodyDef.fixedRotation = true;
         Body body = world.createBody(bodyDef);
 
         PolygonShape shape = new PolygonShape();

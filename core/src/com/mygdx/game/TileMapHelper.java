@@ -7,9 +7,11 @@ import com.badlogic.gdx.maps.objects.PolygonMapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.maps.tiled.renderers.IsometricTiledMapRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
@@ -26,10 +28,10 @@ public class TileMapHelper {
         this.gameScreen = gameScreen;
     }
 
-    public OrthogonalTiledMapRenderer setupMap() {
-        tiledMap = new TmxMapLoader().load("maps/map0.tmx");
+    public IsometricTiledMapRenderer setupMap() {
+        tiledMap = new TmxMapLoader().load("maps/testTilesetIso.tmx");
         parseMapObjects(tiledMap.getLayers().get("objects").getObjects());
-        return new OrthogonalTiledMapRenderer(tiledMap);
+        return new IsometricTiledMapRenderer(tiledMap);
     }
 
     // e3
@@ -66,23 +68,44 @@ public class TileMapHelper {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.StaticBody;
         Body body = gameScreen.getWorld().createBody(bodyDef);
-        Shape shape = createPolygonShape(polygonMapObject);
+        Shape shape = createPolygonShape(polygonMapObject, tiledMap);
         body.createFixture(shape, 1000);
         shape.dispose();
     }
 
     // e3
-    private Shape createPolygonShape(PolygonMapObject polygonMapObject) {
+    private Shape createPolygonShape(PolygonMapObject polygonMapObject, TiledMap map) {
         float[] vertices = polygonMapObject.getPolygon().getTransformedVertices();
         Vector2[] worldVertices = new Vector2[vertices.length / 2];
 
-        for (int i=0; i<vertices.length/2; i++) {
-            Vector2 current = new Vector2(vertices[i*2] / PPM, vertices[i*2+1] / PPM);
-            worldVertices[i] = current;
+        float mapHeight = map.getProperties().get("height", Integer.class) * map.getProperties().get("tileheight", Integer.class);
+        float offsetX = (float) 40 / 2;
+        float offsetY = (float) 21 / 2;
+
+        for (int i = 0; i < vertices.length / 2; ++i) {
+            worldVertices[i] = new Vector2();
+            worldVertices[i].x = vertices[i * 2] / PPM; // Assuming PPM is some scale factor
+            worldVertices[i].y = (mapHeight - vertices[i * 2 + 1]) / PPM; // Invert and scale y
+
+            // Convert to isometric + deal with the offset
+            Vector2 isoVert = TwoDToIso(new Vector2(worldVertices[i].x, worldVertices[i].y));
+            worldVertices[i].x = isoVert.x + offsetX;
+            worldVertices[i].y = isoVert.y + offsetY;
         }
 
         PolygonShape shape = new PolygonShape();
         shape.set(worldVertices);
         return shape;
     }
+
+
+    public static Vector2 TwoDToIso(Vector2 point){
+        Vector2 vel2 = new Vector2();
+
+        vel2.x = point.x - point.y;
+        vel2.y = -(point.x + point.y) / 2;
+        return vel2;
+    }
+
+
 }
